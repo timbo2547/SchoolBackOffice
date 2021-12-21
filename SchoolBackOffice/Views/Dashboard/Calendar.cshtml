@@ -1,0 +1,12 @@
+@{
+    ViewData["Title"] = "Calendar";
+}
+
+<div class="d-flex flex-row">
+    <partial name="_PanelPartial"/>
+
+    <div class="container ml-auto mr-auto mb-auto">
+        <h1 class="page-title">Calendar</h1>
+        @(await Html.RenderComponentAsync<SchoolBackOffice.Views.Shared.Component.Calendar>(RenderMode.ServerPrerendered))
+    </div>    
+</div>
