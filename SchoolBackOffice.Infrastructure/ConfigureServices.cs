@@ -15,6 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 options.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
             });
+            services.AddScoped<ApplicationDbContextInitializer>();
 
             services
                 .AddDefaultIdentity<ApplicationUser>(options =>

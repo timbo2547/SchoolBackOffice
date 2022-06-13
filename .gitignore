@@ -10,7 +10,16 @@ project.json.old
 dist
 .vs
 .vscode
+app.db
+.bak
 
+datasources.xml
+
+app.db
+app.db-wal
+app.db-shm
+
+/.idea/
 .idea
 #remove generated files
 **/wwwroot/app/**/*.js

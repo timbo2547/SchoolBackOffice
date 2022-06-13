@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SchoolBackOffice.Application;
+using SchoolBackOffice.Infrastructure.Persistence;
 
 namespace SchoolBackOffice
 {
@@ -19,6 +20,7 @@ namespace SchoolBackOffice
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
             services.AddApplicationServices();
             services.AddInfrastructureServices(Configuration);
             services.AddWebUiServices();
@@ -31,6 +33,13 @@ namespace SchoolBackOffice
             {
                 app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
+
+                using (var scope = app.ApplicationServices.CreateScope())
+                {
+                    var initializer = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitializer>();
+                    initializer.InitialiseAsync().Wait();
+                    initializer.SeedAsync().Wait();
+                }
             }
             else
             {

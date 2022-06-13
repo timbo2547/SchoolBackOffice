@@ -1,3 +1,4 @@
+@using SchoolBackOffice.Views.Shared.Component
 @{
     ViewData["Title"] = "Calendar";
 }
@@ -7,6 +8,6 @@
 
     <div class="container ml-auto mr-auto mb-auto">
         <h1 class="page-title">Calendar</h1>
-        @(await Html.RenderComponentAsync<SchoolBackOffice.Views.Shared.Component.Calendar>(RenderMode.ServerPrerendered))
+        <component type="typeof(Calendar)" render-mode="ServerPrerendered"/>
     </div>    
 </div>

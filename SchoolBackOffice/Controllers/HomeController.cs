@@ -4,9 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
+using SchoolBackOffice.Infrastructure.Identity;
 using SchoolBackOffice.Models;
 
 namespace SchoolBackOffice.Controllers
@@ -14,15 +16,21 @@ namespace SchoolBackOffice.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, SignInManager<ApplicationUser> signInManager)
         {
             _logger = logger;
+            _signInManager = signInManager;
         }
 
         public IActionResult Index()
         {
-            return View();
+            var vm = new HomeViewModel
+            {
+                IsAuthorized = _signInManager.IsSignedIn(User)
+            };
+            return View(vm);
         }
 
         public IActionResult Privacy()
