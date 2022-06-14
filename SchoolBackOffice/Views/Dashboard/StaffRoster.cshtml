@@ -1,3 +1,5 @@
+@using SchoolBackOffice.Views.Shared.Component
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Staff Roster";
 }
@@ -7,6 +9,6 @@
 
     <div class="container ml-auto mr-auto mb-auto">
         <h1 class="page-title">Staff Roster</h1>
-        @(await Html.RenderComponentAsync<SchoolBackOffice.Views.Shared.Component.StaffRoster>(RenderMode.ServerPrerendered))
+        <component type="typeof(StaffRoster)" render-mode="ServerPrerendered"/>
     </div>    
 </div>

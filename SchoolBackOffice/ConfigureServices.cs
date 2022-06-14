@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Radzen;
-using SchoolBackOffice.Infrastructure.Persistence;
+using SchoolBackOffice.Application.Common.Interfaces;
+using SchoolBackOffice.Services;
 
 namespace SchoolBackOffice
 {
@@ -9,6 +9,8 @@ namespace SchoolBackOffice
     {
         public static IServiceCollection AddWebUiServices(this IServiceCollection services)
         {
+            services.AddDatabaseDeveloperPageExceptionFilter();
+            services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddRazorPages();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddServerSideBlazor();

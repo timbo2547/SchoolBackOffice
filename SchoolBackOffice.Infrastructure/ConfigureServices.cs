@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using SchoolBackOffice.Application.Common.Interfaces;
 using SchoolBackOffice.Infrastructure.Identity;
 using SchoolBackOffice.Infrastructure.Persistence;
+using SchoolBackOffice.Infrastructure.Persistence.Interceptors;
+using SchoolBackOffice.Infrastructure.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -11,6 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddScoped<AuditableEntitySaveChangesInterceptor>();
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
@@ -26,6 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI();
             
+            services.AddTransient<IDateTime, DateTimeService>();
             return services;
         }
     }

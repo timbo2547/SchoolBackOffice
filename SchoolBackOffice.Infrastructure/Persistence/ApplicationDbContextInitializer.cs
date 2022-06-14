@@ -30,6 +30,12 @@ namespace SchoolBackOffice.Infrastructure.Persistence
                 if (_context.Database.IsSqlite())
                 {
                     await _context.Database.MigrateAsync();
+
+                    if (await _context.Database.EnsureCreatedAsync())
+                    {
+                        
+                    }
+                    
                     _logger.LogInformation("Migration Complete");
                 }
             }
