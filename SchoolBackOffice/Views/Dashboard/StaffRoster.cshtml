@@ -1,3 +1,5 @@
+@model IEnumerable<SchoolBackOffice.Domain.Entities.StaffMember>
+
 @using SchoolBackOffice.Views.Shared.Component
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @{
@@ -9,6 +11,10 @@
 
     <div class="container ml-auto mr-auto mb-auto">
         <h1 class="page-title">Staff Roster</h1>
-        <component type="typeof(StaffRoster)" render-mode="ServerPrerendered"/>
+        <input type="button" 
+               class="btn btn-primary mb-2 mt-1" 
+               value="Add Staff Member" 
+               onclick="location.href='@Url.Action("Create", "Staff")'" />
+        <component type="typeof(StaffRoster)" render-mode="ServerPrerendered" param-Staff="@Model"/>
     </div>    
 </div>

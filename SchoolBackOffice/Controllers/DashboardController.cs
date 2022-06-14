@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SchoolBackOffice.Infrastructure.Persistence;
 using SchoolBackOffice.Models;
 
 namespace SchoolBackOffice.Controllers
@@ -14,10 +15,12 @@ namespace SchoolBackOffice.Controllers
     public class DashboardController : Controller
     {
         private readonly ILogger<DashboardController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public DashboardController(ILogger<DashboardController> logger)
+        public DashboardController(ILogger<DashboardController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Dashboard()
@@ -32,7 +35,9 @@ namespace SchoolBackOffice.Controllers
         
         public IActionResult StaffRoster()
         {
-            return View();
+            var staff = _context.StaffMembers
+                .ToList();
+            return View(staff);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

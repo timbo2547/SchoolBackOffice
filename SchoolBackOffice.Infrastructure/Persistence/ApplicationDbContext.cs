@@ -27,6 +27,13 @@ namespace SchoolBackOffice.Infrastructure.Persistence
                 b.Property(x => x.LastName)
                     .IsRequired();
             });
+            builder.Entity<StaffMember>(b =>
+            {
+                b.Property(x => x.FirstName)
+                    .IsRequired();
+                b.Property(x => x.LastName)
+                    .IsRequired();
+            });
         }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -36,5 +43,6 @@ namespace SchoolBackOffice.Infrastructure.Persistence
 
         public DbSet<Student> Students => Set<Student>();
         public DbSet<GradeLevel> GradeLevels => Set<GradeLevel>();
+        public DbSet<StaffMember> StaffMembers => Set<StaffMember>();
     }
 }
