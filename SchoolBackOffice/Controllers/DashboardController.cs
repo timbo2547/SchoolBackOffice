@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SchoolBackOffice.Infrastructure.Identity;
 using SchoolBackOffice.Infrastructure.Persistence;
 using SchoolBackOffice.Models;
 
@@ -16,11 +15,13 @@ namespace SchoolBackOffice.Controllers
     {
         private readonly ILogger<DashboardController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public DashboardController(ILogger<DashboardController> logger, ApplicationDbContext context)
+        public DashboardController(ILogger<DashboardController> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _context = context;
+            _userManager = userManager;
         }
 
         public IActionResult Dashboard()
@@ -35,7 +36,8 @@ namespace SchoolBackOffice.Controllers
         
         public IActionResult StaffRoster()
         {
-            var staff = _context.StaffMembers
+            var staff = _userManager.Users
+                .Where(x => x.IsStaff)
                 .ToList();
             return View(staff);
         }

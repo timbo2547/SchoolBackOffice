@@ -6,5 +6,6 @@ namespace SchoolBackOffice.Infrastructure.Identity
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public bool IsStaff { get; set; }
     }
 }

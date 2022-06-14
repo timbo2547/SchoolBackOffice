@@ -63,11 +63,17 @@ namespace SchoolBackOffice.Infrastructure.Persistence
         {
             // Default roles
             var administratorRole = new IdentityRole("Administrator");
-
             if (_roleManager.Roles.All(r => r.Name != administratorRole.Name))
             {
                 await _roleManager.CreateAsync(administratorRole);
                 _logger.LogInformation($"Created {administratorRole.Name} Role");
+            }
+            
+            var staffRole = new IdentityRole("Staff");
+            if (_roleManager.Roles.All(r => r.Name != staffRole.Name))
+            {
+                await _roleManager.CreateAsync(staffRole);
+                _logger.LogInformation($"Created {staffRole.Name} Role");
             }
             
             // Default users
@@ -75,7 +81,8 @@ namespace SchoolBackOffice.Infrastructure.Persistence
             {
                 UserName = "administrator@localhost", 
                 Email = "administrator@localhost", 
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                IsStaff = true,
             };
 
             if (_userManager.Users.All(u => u.UserName != administrator.UserName))

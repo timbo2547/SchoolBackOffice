@@ -12,7 +12,6 @@ namespace SchoolBackOffice
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddRazorPages();
-            services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddServerSideBlazor();
             services.AddControllersWithViews();
             services.AddScoped<DialogService>();

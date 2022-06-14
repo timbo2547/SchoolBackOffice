@@ -1,4 +1,4 @@
-@using SchoolBackOffice.Domain.Entities
+@using SchoolBackOffice.Infrastructure.Identity
 <div class="flex-row m-auto w-100">
     @foreach (var s in Staff)
     {
@@ -20,5 +20,5 @@
 
 @code {
     [Parameter]
-    public IEnumerable<StaffMember> Staff { get; set; }
+    public IEnumerable<ApplicationUser> Staff { get; set; }
 }

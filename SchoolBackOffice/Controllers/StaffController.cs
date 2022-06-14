@@ -1,8 +1,9 @@
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SchoolBackOffice.Domain.Entities;
+using SchoolBackOffice.Application.Common.Interfaces;
 using SchoolBackOffice.Infrastructure.Persistence;
 using SchoolBackOffice.Models;
 
@@ -12,11 +13,13 @@ namespace SchoolBackOffice.Controllers
     {
         private readonly ILogger<StaffController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly IIdentityService _identityService;
         
-        public StaffController(ILogger<StaffController> logger, ApplicationDbContext context)
+        public StaffController(ILogger<StaffController> logger, ApplicationDbContext context, IIdentityService identityService)
         {
             _logger = logger;
             _context = context;
+            _identityService = identityService;
         }
         
         [HttpGet]
@@ -35,18 +38,26 @@ namespace SchoolBackOffice.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var newStaff = new StaffMember()
+                var res = await _identityService.CreateUserAsync(model.Email, model.Password, model.FirstName, model.LastName, true);
+                if (res.Result.Succeeded)
                 {
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                };
-                _context.StaffMembers.Add(newStaff);
-                await _context.SaveChangesAsync();
-                _logger.LogInformation($"New Staff Member '{newStaff.LastName}, {newStaff.FirstName}' Added");
-                return Redirect("/Dashboard/StaffRoster");
+                    _logger.LogInformation($"New Staff User '{model.LastName}, {model.FirstName}' created");
+                    await _identityService.AddUserToRolesAsync(res.UserId, new[] {"Staff"});
+                    _logger.LogInformation($"Added '{model.LastName}, {model.FirstName}' to 'Staff' Role");
+                    return Redirect("/Dashboard/StaffRoster");
+                }
+                
+                foreach (var error in res.Result.Errors)
+                    ModelState.AddModelError("", error);
             }
 
             return View(model);
+        }
+        
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

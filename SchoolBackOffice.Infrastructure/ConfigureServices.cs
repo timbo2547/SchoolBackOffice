@@ -30,6 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddDefaultUI();
             
             services.AddTransient<IDateTime, DateTimeService>();
+            services.AddTransient<IIdentityService, IdentityService>();
             return services;
         }
     }
