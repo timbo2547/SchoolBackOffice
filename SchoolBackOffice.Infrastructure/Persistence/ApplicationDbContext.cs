@@ -21,20 +21,8 @@ namespace SchoolBackOffice.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<Student>(b =>
-            {
-                b.Property(x => x.FirstName)
-                    .IsRequired();
-                b.Property(x => x.LastName)
-                    .IsRequired();
-            });
-            builder.Entity<StaffMember>(b =>
-            {
-                b.Property(x => x.FirstName)
-                    .IsRequired();
-                b.Property(x => x.LastName)
-                    .IsRequired();
-            });
+
+
 
             builder.Entity<ApplicationUser>(b =>
             {
@@ -50,9 +38,7 @@ namespace SchoolBackOffice.Infrastructure.Persistence
             optionsBuilder.AddInterceptors(_auditableEntitySaveChangesInterceptor);
         }
 
-        public DbSet<Student> Students => Set<Student>();
         public DbSet<GradeLevel> GradeLevels => Set<GradeLevel>();
-        public DbSet<StaffMember> StaffMembers => Set<StaffMember>();
         public DbSet<StaffUser> StaffUsers => Set<StaffUser>();
     }
 }
