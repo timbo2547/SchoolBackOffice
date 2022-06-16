@@ -31,6 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI();
             
+            services.AddTransient<IEmailSender, MessageService.AuthMessageSender>();
             services.AddTransient<IDateTime, DateTimeService>();
             services.AddTransient<IIdentityService, IdentityService>();
             services.AddTransient<IStaffUserService, StaffUserService>();

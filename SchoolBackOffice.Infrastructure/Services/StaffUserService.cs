@@ -13,11 +13,13 @@ namespace SchoolBackOffice.Infrastructure.Services
     {
         private readonly IIdentityService _identityService;
         private readonly ApplicationDbContext _context;
+        private readonly IEmailSender _emailSender;
         
-        public StaffUserService(IIdentityService identityService, ApplicationDbContext context)
+        public StaffUserService(IIdentityService identityService, ApplicationDbContext context, IEmailSender emailSender)
         {
             _identityService = identityService;
             _context = context;
+            _emailSender = emailSender;
         }
 
         public async Task<StaffUser> GetStaffUserAsync(int staffUserId)
@@ -47,6 +49,14 @@ namespace SchoolBackOffice.Infrastructure.Services
                     LastName = lastName,
                     Email = email,
                 };
+
+                var message = 
+                    "New Account Created: " + Environment.NewLine +
+                    $"User Name: {staffUser.Email}" + Environment.NewLine +
+                    $"Initial Password: {password}" + Environment.NewLine +
+                    $"Please change your password at your earliest convenience.";
+
+                await _emailSender.SendEmailAsync(email, "Account Created", message);
                 
                 return await CreateStaffUserAsync(staffUser);
             }
