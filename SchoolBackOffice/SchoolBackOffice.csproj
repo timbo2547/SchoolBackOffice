@@ -35,4 +35,12 @@
       <UpToDateCheckInput Remove="Areas\Identity\Account\Register.cshtml" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Areas\Dashboard\Controllers" />
+      <Folder Include="Areas\Dashboard\Data" />
+      <Folder Include="Areas\Dashboard\Models" />
+      <Folder Include="Areas\Dashboard\Views" />
+      <Folder Include="Pages\Dashboard" />
+    </ItemGroup>
+
 </Project>

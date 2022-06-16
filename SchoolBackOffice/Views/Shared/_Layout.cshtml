@@ -19,7 +19,7 @@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">School Back Office</a>
+            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Accel MS</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -33,7 +33,7 @@
                     @if (SignInManager.IsSignedIn(User))
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="Dashboard">Dashboard</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="Dashboard">Back Office</a>
                         </li>
                     }
                     else
@@ -48,7 +48,7 @@
         </div>
     </nav>
 </header>
-<div class="container">
+<div class="container pb-5">
     <main role="main" class="pb-3">
         @RenderBody()
     </main>
@@ -56,7 +56,7 @@
 
 <footer class="border-top footer text-muted">
     <div class="container">
-        &copy; 2021 - School Back Office - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        &copy; 2021 - Accel MS - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
     </div>
 </footer>
 

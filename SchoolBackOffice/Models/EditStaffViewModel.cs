@@ -4,30 +4,25 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SchoolBackOffice.Models
 {
-    public class CreateStaffViewModel
+    public class EditStaffViewModel
     {
-        public CreateStaffViewModel()
+        public EditStaffViewModel()
         {
             Roles = new List<RoleViewModel>();
         }
 
         public string StaffId { get; set; }
-        
-        [Required]
+
         [DisplayName("First Name")]
         public string FirstName { get; set; }
         
-        [Required]
         [DisplayName("Last Name")]
         public string LastName { get; set; }
         
-        [Required]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
         
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }
@@ -38,11 +33,5 @@ namespace SchoolBackOffice.Models
         public string ConfirmPassword { get; set; }
 
         public List<RoleViewModel> Roles { get; set; }
-    }
-
-    public class RoleViewModel
-    {
-        public string Name { get; set; }
-        public bool IsSelected { get; set; }
     }
 }

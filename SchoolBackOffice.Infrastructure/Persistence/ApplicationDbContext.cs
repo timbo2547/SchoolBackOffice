@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SchoolBackOffice.Application.Common.Interfaces;
 using SchoolBackOffice.Domain.Entities;
 using SchoolBackOffice.Infrastructure.Identity;
 using SchoolBackOffice.Infrastructure.Persistence.Interceptors;
 
 namespace SchoolBackOffice.Infrastructure.Persistence
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplicationDbContext
     {
         private readonly AuditableEntitySaveChangesInterceptor _auditableEntitySaveChangesInterceptor;
         public ApplicationDbContext(

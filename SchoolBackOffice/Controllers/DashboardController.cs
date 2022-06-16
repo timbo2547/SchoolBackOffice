@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SchoolBackOffice.Application.Common.Interfaces;
 using SchoolBackOffice.Infrastructure.Identity;
-using SchoolBackOffice.Infrastructure.Persistence;
 using SchoolBackOffice.Models;
 
 namespace SchoolBackOffice.Controllers
@@ -14,10 +14,10 @@ namespace SchoolBackOffice.Controllers
     public class DashboardController : Controller
     {
         private readonly ILogger<DashboardController> _logger;
-        private readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public DashboardController(ILogger<DashboardController> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public DashboardController(ILogger<DashboardController> logger, IApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _context = context;
@@ -32,7 +32,7 @@ namespace SchoolBackOffice.Controllers
         public IActionResult Calendar()
         {
             return View();
-        }        
+        }
         
         public IActionResult StaffRoster()
         {

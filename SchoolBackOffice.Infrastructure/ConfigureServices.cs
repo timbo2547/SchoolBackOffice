@@ -18,6 +18,8 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 options.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
             });
+            
+            services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
             services.AddScoped<ApplicationDbContextInitializer>();
 
             services

@@ -1,14 +1,14 @@
-@model CreateStaffViewModel
+@model EditStaffViewModel
 
 @{
-    ViewData["Title"] = "Create Staff Member";
+    ViewData["Title"] = "Edit Staff Member";
 }
 
 <h1>@ViewData["Title"]</h1>
 <div class="row">
     <div class="col-md-8">
         <section>
-            <form asp-controller="Staff" asp-action="Create" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal" role="form" >
+            <form asp-controller="Staff" asp-action="Edit" asp-route-userid="@ViewData["UserId"]" method="post" class="form-horizontal" role="form" >
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="form-group">
@@ -73,7 +73,7 @@
                 
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <button type="submit" class="btn btn-primary">Create</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
                     </div>
                 </div>
                 
