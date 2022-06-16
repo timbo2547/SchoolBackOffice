@@ -1,11 +1,9 @@
 using System.Diagnostics;
-using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SchoolBackOffice.Application.Common.Interfaces;
-using SchoolBackOffice.Infrastructure.Identity;
 using SchoolBackOffice.Models;
 
 namespace SchoolBackOffice.Controllers
@@ -14,14 +12,12 @@ namespace SchoolBackOffice.Controllers
     public class DashboardController : Controller
     {
         private readonly ILogger<DashboardController> _logger;
-        private readonly IApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IStaffUserService _staffUserService;
 
-        public DashboardController(ILogger<DashboardController> logger, IApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public DashboardController(ILogger<DashboardController> logger, IStaffUserService staffUserService)
         {
             _logger = logger;
-            _context = context;
-            _userManager = userManager;
+            _staffUserService = staffUserService;
         }
 
         public IActionResult Dashboard()
@@ -34,12 +30,12 @@ namespace SchoolBackOffice.Controllers
             return View();
         }
         
-        public IActionResult StaffRoster()
+        public async Task<IActionResult> StaffRoster()
         {
-            var staff = _userManager.Users
-                .Where(x => x.IsStaff)
-                .ToList();
-            return View(staff);
+            var s = await _staffUserService
+                .GetStaffUsersAsync();
+            
+            return View(s);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

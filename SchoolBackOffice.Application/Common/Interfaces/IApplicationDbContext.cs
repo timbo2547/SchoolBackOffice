@@ -8,5 +8,6 @@ namespace SchoolBackOffice.Application.Common.Interfaces
         DbSet<Student> Students { get; }
         DbSet<GradeLevel> GradeLevels { get; }
         DbSet<StaffMember> StaffMembers { get; }
+        DbSet<StaffUser> StaffUsers { get; }
     }
 }

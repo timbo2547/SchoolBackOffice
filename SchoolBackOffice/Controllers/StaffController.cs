@@ -3,10 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SchoolBackOffice.Application.Common.Interfaces;
-using SchoolBackOffice.Infrastructure.Persistence;
 using SchoolBackOffice.Models;
 
 namespace SchoolBackOffice.Controllers
@@ -14,38 +12,36 @@ namespace SchoolBackOffice.Controllers
     public class StaffController : Controller
     {
         private readonly ILogger<StaffController> _logger;
-        private readonly ApplicationDbContext _context;
         private readonly IIdentityService _identityService;
-        
+        private readonly IStaffUserService _staffUserService;
 
-        public StaffController(ILogger<StaffController> logger, ApplicationDbContext context, IIdentityService identityService)
+        public StaffController(ILogger<StaffController> logger, IIdentityService identityService, IStaffUserService staffUserService)
         {
             _logger = logger;
-            _context = context;
             _identityService = identityService;
+            _staffUserService = staffUserService;
         }
 
         [HttpGet]
         [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> Edit(string id)
+        public async Task<IActionResult> Edit(int id)
         {
-            ViewData["UserId"] = id;
+            ViewData["StaffUserId"] = id;
 
-            var u = _context.Users
-                .SingleOrDefault(x => x.Id == id);
+            var staffUser = await _staffUserService.GetStaffUserAsync(id);
 
-            if (u == null)
+            if (staffUser == null)
                 return View();
             
             var roleList = await _identityService.GetRoleNames();
-            var userRoles = await _identityService.GetUserRoles(u.Id);
+            var userRoles = await _identityService.GetUserRoles(staffUser.AspUserId);
             
             var vm = new EditStaffViewModel
             {
                 StaffId = id,
-                Email = u.Email,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
+                Email = staffUser.Email,
+                FirstName = staffUser.FirstName,
+                LastName = staffUser.LastName,
                 Roles = roleList.Select(x => new RoleViewModel
                 {
                     Name = x, 
@@ -59,27 +55,27 @@ namespace SchoolBackOffice.Controllers
         [HttpPost]
         [Authorize(Roles = "Administrator")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(EditStaffViewModel model, string userId)
+        public async Task<IActionResult> Edit(EditStaffViewModel model, int staffUserId)
         {
-            ViewData["UserId"] = userId;
-            var u = _context.Users
-                .SingleOrDefault(x => x.Id == userId);
+            ViewData["StaffUserId"] = staffUserId;
+            
+            var staffUser = await _staffUserService.GetStaffUserAsync(staffUserId);
 
-            if (u == null)
+            if (staffUser == null)
             {
-                _logger.LogWarning($"User with userId: '{userId} not round");
+                _logger.LogWarning($"User with userId: '{staffUserId} not round");
                 ModelState.AddModelError("", "User not found");
                 return View(model);
             }
             
-            u.FirstName = model.FirstName;
-            u.LastName = model.LastName;
-            u.Email = model.Email;
+            staffUser.FirstName = model.FirstName;
+            staffUser.LastName = model.LastName;
+            staffUser.Email = model.Email;
 
             // if password is not null then update it
             if (!string.IsNullOrEmpty(model.Password))
             {
-                var res = await _identityService.ResetPassword(userId, model.Password);
+                var res = await _identityService.ResetPassword(staffUser.AspUserId, model.Password);
                 if (!res.Succeeded)
                 {
                     foreach (var error in res.Errors)
@@ -93,17 +89,18 @@ namespace SchoolBackOffice.Controllers
                 .Select(x => x.Name)
                 .ToArray();
             if (selectedRoles.Any())
-                await _identityService.AddUserToRolesAsync(userId, selectedRoles);
+                await _identityService.AddUserToRolesAsync(staffUser.AspUserId, selectedRoles);
             
             var unSelectedRoles = model.Roles               
                 .Where(x => !x.IsSelected)
                 .Select(x => x.Name)
                 .ToArray();
             if (unSelectedRoles.Any())
-                await _identityService.RemoveUserFromRolesAsync(userId, unSelectedRoles);
+                await _identityService.RemoveUserFromRolesAsync(staffUser.AspUserId, unSelectedRoles);
+
+            await _staffUserService.UpdateStaffUserAsync(staffUser);
             
-            await _context.SaveChangesAsync();
-            _logger.LogWarning($"UserId: '{userId}', User: {u.LastName}, {u.FirstName} updated");
+            _logger.LogInformation($"StaffUserId: '{staffUserId}', User: {staffUser.LastName}, {staffUser.FirstName} updated");
             return RedirectToAction("StaffRoster", "Dashboard", new { area = "" });
         }
         
@@ -130,25 +127,21 @@ namespace SchoolBackOffice.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var res = await _identityService.CreateUserAsync(model.Email, model.Password, model.FirstName, model.LastName, true);
-                if (res.Result.Succeeded)
-                {
-                    _logger.LogInformation($"New Staff User '{model.LastName}, {model.FirstName}' created");
-                    
-                    var roles = model.Roles
-                        .Where(x => x.IsSelected)
-                        .Select(x => x.Name)
-                        .ToArray();
+                var roles = model.Roles
+                    .Where(x => x.IsSelected)
+                    .Select(x => x.Name)
+                    .ToArray();
 
-                    if (roles.Any())
-                    {
-                        await _identityService.AddUserToRolesAsync(res.UserId, roles);
-                        _logger.LogInformation($"Added '{model.LastName}, {model.FirstName}' to {roles} Role");
-                    }
-                    return Redirect("/Dashboard/StaffRoster");
-                }
+                var newStaffUser = await _staffUserService.CreateStaffUserAsync(
+                    model.Email, model.Password, model.FirstName, model.LastName, roles);
                 
-                foreach (var error in res.Result.Errors)
+                _logger.LogInformation($"New Staff User '{model.LastName}, {model.FirstName}' created");
+
+                if (!newStaffUser.Error.Any()) 
+                    return RedirectToAction("StaffRoster", "Dashboard");
+                
+                _logger.LogWarning($"Error Creating User '{model.LastName}, {model.FirstName}'");
+                foreach (var error in newStaffUser.Error)
                     ModelState.AddModelError("", error);
             }
 
@@ -157,18 +150,16 @@ namespace SchoolBackOffice.Controllers
         
         [HttpGet]
         [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(int id)
         {
-            ViewData["UserId"] = id;
-            var u = await _context.Users
-                .SingleOrDefaultAsync(x => x.Id == id);
-
+            ViewData["StaffUserId"] = id;
+            var u = await _staffUserService.GetStaffUserAsync(id);
+            
             if (u == null)
                 return Error();
 
-            var res = await _identityService.DeleteUserAsync(id);
-            
-            return res.Succeeded ? Redirect("/Dashboard/StaffRoster") : Error();
+            var res = await _identityService.DeleteUserAsync(u.AspUserId);
+            return res.Succeeded ? RedirectToAction("StaffRoster", "Dashboard") : Error();
         }
         
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -11,7 +11,7 @@ namespace SchoolBackOffice.Models
             Roles = new List<RoleViewModel>();
         }
 
-        public string StaffId { get; set; }
+        public int StaffId { get; set; }
 
         [DisplayName("First Name")]
         public string FirstName { get; set; }

@@ -33,6 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
             
             services.AddTransient<IDateTime, DateTimeService>();
             services.AddTransient<IIdentityService, IdentityService>();
+            services.AddTransient<IStaffUserService, StaffUserService>();
             return services;
         }
     }

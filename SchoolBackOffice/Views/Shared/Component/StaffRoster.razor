@@ -1,4 +1,4 @@
-@using SchoolBackOffice.Infrastructure.Identity
+@using SchoolBackOffice.Domain.Entities
 <div class="flex-row m-auto w-100">
     @foreach (var s in Staff)
     {
@@ -24,8 +24,8 @@
                     </div>
                 </div>
                 <div>
-                    <RadzenLink Path=@($"Staff/Edit/{s.Id}") Text="Edit" class="btn btn-primary"/>
-                    <RadzenLink Path=@($"Staff/Delete/{s.Id}") Text="Delete" class="btn btn-danger"/>
+                    <RadzenLink Path=@($"Staff/Edit/{s.StaffUserId}") Text="Edit" class="btn btn-primary"/>
+                    <RadzenLink Path=@($"Staff/Delete/{s.StaffUserId}") Text="Delete" class="btn btn-danger"/>
                 </div>
             </div>
         </RadzenCard>
@@ -34,5 +34,5 @@
 
 @code {
     [Parameter]
-    public IEnumerable<ApplicationUser> Staff { get; set; }
+    public IEnumerable<StaffUser> Staff { get; set; }
 }

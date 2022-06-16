@@ -35,6 +35,14 @@ namespace SchoolBackOffice.Infrastructure.Persistence
                 b.Property(x => x.LastName)
                     .IsRequired();
             });
+
+            builder.Entity<ApplicationUser>(b =>
+            {
+                b
+                    .HasOne<StaffUser>()
+                    .WithOne()
+                    .HasForeignKey("StaffUser", "AspUserId");
+            });
         }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -45,5 +53,6 @@ namespace SchoolBackOffice.Infrastructure.Persistence
         public DbSet<Student> Students => Set<Student>();
         public DbSet<GradeLevel> GradeLevels => Set<GradeLevel>();
         public DbSet<StaffMember> StaffMembers => Set<StaffMember>();
+        public DbSet<StaffUser> StaffUsers => Set<StaffUser>();
     }
 }
