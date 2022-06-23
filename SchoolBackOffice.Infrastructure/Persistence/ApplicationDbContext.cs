@@ -21,15 +21,15 @@ namespace SchoolBackOffice.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-
-
-
             builder.Entity<ApplicationUser>(b =>
             {
                 b
                     .HasOne<StaffUser>()
                     .WithOne()
-                    .HasForeignKey("StaffUser", "AspUserId");
+                    .HasForeignKey("StaffUser", "AspUserId");                b
+                    .HasOne<StudentUser>()
+                    .WithOne()
+                    .HasForeignKey("StudentUser", "AspUserId");
             });
         }
         
@@ -40,5 +40,6 @@ namespace SchoolBackOffice.Infrastructure.Persistence
 
         public DbSet<GradeLevel> GradeLevels => Set<GradeLevel>();
         public DbSet<StaffUser> StaffUsers => Set<StaffUser>();
+        public DbSet<StudentUser> StudentUsers => Set<StudentUser>();
     }
 }

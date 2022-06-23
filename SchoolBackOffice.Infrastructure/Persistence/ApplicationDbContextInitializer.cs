@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SchoolBackOffice.Application.Common.Interfaces;
+using SchoolBackOffice.Domain.Entities;
 using SchoolBackOffice.Infrastructure.Identity;
 
 namespace SchoolBackOffice.Infrastructure.Persistence
@@ -14,13 +17,15 @@ namespace SchoolBackOffice.Infrastructure.Persistence
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<ApplicationDbContextInitializer> _logger;
+        private readonly IDateTime _dateTime;
 
-        public ApplicationDbContextInitializer(ILogger<ApplicationDbContextInitializer> logger, ApplicationDbContext context, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+        public ApplicationDbContextInitializer(ILogger<ApplicationDbContextInitializer> logger, ApplicationDbContext context, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IDateTime dateTime)
         {
             _context = context;
             _roleManager = roleManager;
             _userManager = userManager;
             _logger = logger;
+            _dateTime = dateTime;
         }
         
         public async Task InitialiseAsync()
@@ -59,6 +64,26 @@ namespace SchoolBackOffice.Infrastructure.Persistence
             }
         }
 
+        private static IEnumerable<GradeLevel> GetDefaultGrades()
+        {
+            return new List<GradeLevel>()
+            {
+                new ("K", "Kindergarten", 1),                
+                new ("1", "First Grade", 2),                
+                new ("2", "Second Grade", 3),                
+                new ("3", "Third Grade", 4),                
+                new ("4", "Fourth Grade", 5),
+                new ("5", "Fifth Grade", 6),
+                new ("6", "Sixth Grade", 7),
+                new ("7", "Seventh Grade", 8),
+                new ("8", "Eighth Grade", 9),
+                new ("9", "Freshman", 10),
+                new ("10", "Sophomore", 11),
+                new ("11", "Junior", 12),
+                new ("12", "Senior", 13),
+            };
+        }
+
         private async Task TrySeedAsync()
         {
             // Default roles
@@ -74,6 +99,15 @@ namespace SchoolBackOffice.Infrastructure.Persistence
             {
                 await _roleManager.CreateAsync(staffRole);
                 _logger.LogInformation($"Created {staffRole.Name} Role");
+            }
+            
+            // Default Grades
+            if (!await _context.GradeLevels.AnyAsync())
+            {
+                await _context.GradeLevels
+                    .AddRangeAsync(GetDefaultGrades());
+
+                await _context.SaveChangesAsync();
             }
             
             // Default users
