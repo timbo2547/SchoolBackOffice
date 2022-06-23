@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Radzen;
 using SchoolBackOffice.Application.Common.Interfaces;
 using SchoolBackOffice.Services;
+using SchoolBackOffice.Services.StaffUsers;
 
 namespace SchoolBackOffice
 {
@@ -11,6 +12,7 @@ namespace SchoolBackOffice
         {
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
+            services.AddTransient<IStaffUserViewModelService, StaffUserViewModelService>();
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddControllersWithViews();

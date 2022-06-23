@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using SchoolBackOffice.Application.Common.Interfaces;
 using SendGrid;
 using SendGrid.Helpers.Mail;
@@ -17,20 +17,21 @@ namespace SchoolBackOffice.Infrastructure.Services
         public class AuthMessageSender : IEmailSender
         {
             private readonly ILogger<AuthMessageSender> _logger;
-            public AuthMessageSender(ILogger<AuthMessageSender> logger)
+            private readonly IConfiguration _configuration;
+            public AuthMessageSender(ILogger<AuthMessageSender> logger, IConfiguration configuration)
             {
                 _logger = logger;
-                Options = new AuthMessageSenderOptions();
+                _configuration = configuration;
             }
             
-            private AuthMessageSenderOptions Options { get; }
             public async Task SendEmailAsync(string toEmail, string subject, string message)
             {
-                if (string.IsNullOrEmpty(Options.SendGridKey))
+                var sendGridKey = _configuration.GetValue<string>("SendGridKey");
+                if (string.IsNullOrEmpty(sendGridKey))
                 {
                     throw new Exception("Null SendGridKey");
                 }
-                await Execute(Options.SendGridKey, subject, message, toEmail);
+                await Execute(sendGridKey, subject, message, toEmail);
             }
             
             private async Task Execute(string apiKey, string subject, string message, string toEmail)

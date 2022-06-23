@@ -1,10 +1,14 @@
+using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using SchoolBackOffice.Application.Common.Interfaces;
+using SchoolBackOffice.Domain.Entities;
 using SchoolBackOffice.Models;
 
 namespace SchoolBackOffice.Controllers
@@ -14,41 +18,42 @@ namespace SchoolBackOffice.Controllers
         private readonly ILogger<StaffController> _logger;
         private readonly IIdentityService _identityService;
         private readonly IStaffUserService _staffUserService;
+        private readonly IEmailSender _emailSender;
+        private readonly IStaffUserViewModelService _staffUserViewModelService;
 
-        public StaffController(ILogger<StaffController> logger, IIdentityService identityService, IStaffUserService staffUserService)
+        public StaffController(ILogger<StaffController> logger, IIdentityService identityService, IStaffUserService staffUserService, IEmailSender emailSender, IStaffUserViewModelService staffUserViewModelService)
         {
             _logger = logger;
             _identityService = identityService;
             _staffUserService = staffUserService;
+            _emailSender = emailSender;
+            _staffUserViewModelService = staffUserViewModelService;
         }
-
-        [HttpGet]
+        
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(int id)
         {
             ViewData["StaffUserId"] = id;
 
-            var staffUser = await _staffUserService.GetStaffUserAsync(id);
+            var (dto, error) = await _staffUserViewModelService
+                .GetEditStaffViewModel(id);
 
-            if (staffUser == null)
-                return View();
-            
-            var roleList = await _identityService.GetRoleNames();
-            var userRoles = await _identityService.GetUserRoles(staffUser.AspUserId);
-            
+            if (error.Any())
+                ModelState.AddModelError("", error);
+
             var vm = new EditStaffViewModel
             {
-                StaffId = id,
-                Email = staffUser.Email,
-                FirstName = staffUser.FirstName,
-                LastName = staffUser.LastName,
-                Roles = roleList.Select(x => new RoleViewModel
+                StaffId = dto.StaffUserId,
+                Email = dto.Email,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Roles = dto.Roles.Select(x => new RoleViewModel()
                 {
-                    Name = x, 
-                    IsSelected = userRoles.Contains(x)
+                    Name = x.Name,
+                    IsSelected = x.IsSelected,
                 }).ToList()
             };
-
+            
             return View(vm);
         }
         
@@ -134,7 +139,15 @@ namespace SchoolBackOffice.Controllers
 
                 var newStaffUser = await _staffUserService.CreateStaffUserAsync(
                     model.Email, model.Password, model.FirstName, model.LastName, roles);
+
+                var staffUser = await _staffUserService.GetStaffUserAsync(newStaffUser.StaffUserId);
+
+                var token = await _staffUserService.GetEmailConfirmationTokenAsync(staffUser);
                 
+                token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+                await SendEmail(model, returnUrl, staffUser, token);
+
                 _logger.LogInformation($"New Staff User '{model.LastName}, {model.FirstName}' created");
 
                 if (!newStaffUser.Error.Any()) 
@@ -147,7 +160,25 @@ namespace SchoolBackOffice.Controllers
 
             return View(model);
         }
-        
+
+        private async Task SendEmail(CreateStaffViewModel model, string returnUrl, StaffUser staffUser, string token)
+        {
+            var emailConfirmationUrl = Url.Page(
+                "/Account/ConfirmEmail",
+                pageHandler: null,
+                values: new {area = "Identity", userId = staffUser.AspUserId, code = token, returnUrl = returnUrl},
+                protocol: Request.Scheme);
+
+            var message =
+                "New Account Created: " + Environment.NewLine +
+                $"User Name: {model.Email}" + Environment.NewLine +
+                $"Initial Password: {model.Password}" + Environment.NewLine +
+                $"Confirm your account with this link: {emailConfirmationUrl}" + Environment.NewLine +
+                $"Please change your password at your earliest convenience.";
+
+            await _emailSender.SendEmailAsync(model.Email, "Account Created", message);
+        }
+
         [HttpGet]
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Delete(int id)

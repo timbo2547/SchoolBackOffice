@@ -12,5 +12,6 @@ namespace SchoolBackOffice.Application.Common.Interfaces
         Task<(string[] Error, int StaffUserId)> CreateStaffUserAsync(string email, string password, string firstName, string lastName, string[] roles);
         Task<(string[] Error, int StaffUserId)> CreateStaffUserAsync(StaffUser staffUser);
         Task<int> UpdateStaffUserAsync(StaffUser staffUser);
+        Task<string> GetEmailConfirmationTokenAsync(StaffUser user);
     }
 }

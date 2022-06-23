@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using SchoolBackOffice.Application.Common.Interfaces;
 using SchoolBackOffice.Domain.Entities;
+using SchoolBackOffice.Infrastructure.Identity;
 using SchoolBackOffice.Infrastructure.Persistence;
 
 namespace SchoolBackOffice.Infrastructure.Services
@@ -14,12 +19,14 @@ namespace SchoolBackOffice.Infrastructure.Services
         private readonly IIdentityService _identityService;
         private readonly ApplicationDbContext _context;
         private readonly IEmailSender _emailSender;
+        private readonly UserManager<ApplicationUser> _userManager;
         
-        public StaffUserService(IIdentityService identityService, ApplicationDbContext context, IEmailSender emailSender)
+        public StaffUserService(IIdentityService identityService, ApplicationDbContext context, IEmailSender emailSender, UserManager<ApplicationUser> userManager)
         {
             _identityService = identityService;
             _context = context;
             _emailSender = emailSender;
+            _userManager = userManager;
         }
 
         public async Task<StaffUser> GetStaffUserAsync(int staffUserId)
@@ -49,19 +56,16 @@ namespace SchoolBackOffice.Infrastructure.Services
                     LastName = lastName,
                     Email = email,
                 };
-
-                var message = 
-                    "New Account Created: " + Environment.NewLine +
-                    $"User Name: {staffUser.Email}" + Environment.NewLine +
-                    $"Initial Password: {password}" + Environment.NewLine +
-                    $"Please change your password at your earliest convenience.";
-
-                await _emailSender.SendEmailAsync(email, "Account Created", message);
                 
                 return await CreateStaffUserAsync(staffUser);
             }
 
             return (res.Result.Errors, 0);
+        }
+        
+        public async Task<string> GetEmailConfirmationTokenAsync(ApplicationUser user) 
+        {
+            return await _userManager.GenerateEmailConfirmationTokenAsync(user);
         }
 
         public async Task<(string[] Error, int StaffUserId)> CreateStaffUserAsync(StaffUser staffUser)
@@ -75,6 +79,14 @@ namespace SchoolBackOffice.Infrastructure.Services
         {
             _context.StaffUsers.Update(staffUser);
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<string> GetEmailConfirmationTokenAsync(StaffUser user)
+        {
+            var applicationUser = await _userManager.Users
+                .FirstOrDefaultAsync(x => x.Id == user.AspUserId);
+            
+            return await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
         }
     }
 }
