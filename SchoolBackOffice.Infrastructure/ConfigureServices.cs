@@ -35,6 +35,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IDateTime, DateTimeService>();
             services.AddTransient<IIdentityService, IdentityService>();
             services.AddTransient<IStaffUserService, StaffUserService>();
+            services.AddTransient<IStudentUserService, StudentUserService>();
+            services.AddTransient<IGradeLevelService, GradeLevelService>();
             return services;
         }
     }

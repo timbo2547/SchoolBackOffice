@@ -1,0 +1,22 @@
+@using SchoolBackOffice.Views.Shared.Component
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<SchoolBackOffice.Domain.Entities.StudentUser>
+
+@{
+    ViewData["Title"] = "Student Roster";
+}
+
+<!DOCTYPE html>
+
+<div class="d-flex flex-row">
+    <partial name="_PanelPartial"/>
+
+    <div class="container ml-auto mr-auto mb-auto">
+        <h1 class="page-title">Student Roster</h1>
+        <input type="button" 
+               class="btn btn-primary mb-2 mt-1" 
+               value="Add Student" 
+               onclick="location.href='@Url.Action("Create", "Student")'" />
+        <component type="typeof(StudentRoster)" render-mode="ServerPrerendered" param-Students="@Model"/>
+    </div>    
+</div>

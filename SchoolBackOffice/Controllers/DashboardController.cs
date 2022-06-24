@@ -13,11 +13,15 @@ namespace SchoolBackOffice.Controllers
     {
         private readonly ILogger<DashboardController> _logger;
         private readonly IStaffUserService _staffUserService;
+        private readonly IStudentUserService _studenUserService;
 
-        public DashboardController(ILogger<DashboardController> logger, IStaffUserService staffUserService)
+        public DashboardController(ILogger<DashboardController> logger, 
+            IStaffUserService staffUserService, 
+            IStudentUserService studentUserService)
         {
             _logger = logger;
             _staffUserService = staffUserService;
+            _studenUserService = studentUserService;
         }
 
         public IActionResult Dashboard()
@@ -34,6 +38,14 @@ namespace SchoolBackOffice.Controllers
         {
             var s = await _staffUserService
                 .GetStaffUsersAsync();
+            
+            return View(s);
+        }
+        
+        public async Task<IActionResult> StudentRoster()
+        {
+            var s = await _studenUserService
+                .GetUsersAsync();
             
             return View(s);
         }

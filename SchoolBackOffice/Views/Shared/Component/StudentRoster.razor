@@ -1,0 +1,37 @@
+@using SchoolBackOffice.Domain.Entities
+<div class="flex-row m-auto w-100">
+    @foreach (var s in Students)
+    {
+        <RadzenCard class="mb-2">
+            <div class="container d-flex flex-row justify-content-between">
+                <div class="d-flex flex-row">
+                    <div>
+                        <h3 class="h5">Students</h3>
+                        <RadzenImage Path="http://placekitten.com/120/120" Class="rounded-circle float-left mr-3" Style="width: 100px; height: 100px;"/>
+                    </div>
+                    <div class="ml-2 w-40 p-1">
+                        <div>Student</div>
+                        <b>@s.DisplayName</b>
+                        <div class="mt-2">Grade</div>
+                        <b>@s.Grade.GradeDisplayName</b>
+                    </div>
+                    <div class="ml-5 w-40 p-1">
+                        <div>Email</div>
+                        <b>@s.Email</b>
+                        <div class="mt-2">Phone #</div>
+                        <b>@s.PhoneNumber</b>
+                    </div>
+                </div>
+                <div>
+                    <RadzenLink Path=@($"Student/Edit/{s.StudentUserId}") Text="Edit" class="btn btn-primary"/>
+                    <RadzenLink Path=@($"Student/Delete/{s.StudentUserId}") Text="Delete" class="btn btn-danger"/>
+                </div>
+            </div>
+        </RadzenCard>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public IEnumerable<StudentUser> Students { get; set; }
+}
