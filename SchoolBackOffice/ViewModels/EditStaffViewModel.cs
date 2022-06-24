@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using SchoolBackOffice.Models;
 
-namespace SchoolBackOffice.Models
+namespace SchoolBackOffice.ViewModels
 {
     public class EditStaffViewModel
     {
@@ -11,7 +12,7 @@ namespace SchoolBackOffice.Models
             Roles = new List<RoleViewModel>();
         }
 
-        public int StaffId { get; set; }
+        public int StaffUserId { get; set; }
 
         [DisplayName("First Name")]
         public string FirstName { get; set; }

@@ -16,5 +16,6 @@ namespace SchoolBackOffice.Application.Common.Interfaces
         Task<Result> AddUserToRolesAsync(string userId, string[] roles);
         Task<Result> RemoveUserFromRolesAsync(string userId, string[] roles);
         Task<Result> DeleteUserAsync(string userId);
+        Task<string> GetEmailConfirmationTokenAsync(string aspUserId);
     }
 }

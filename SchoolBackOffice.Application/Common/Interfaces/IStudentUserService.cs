@@ -10,5 +10,6 @@ namespace SchoolBackOffice.Application.Common.Interfaces
         Task<IEnumerable<StudentUser>> GetUsersAsync();
         Task<(string[] Error, int StudentUserId)> CreateStudentUserAsync(string email, string password, string firstName, string lastName, int gradeLevelId);
         Task<(string[] Error, int StudentUserId)> CreateStudentUserAsync(StudentUser studentUser);
+        Task<int> UpdateStudentUserAsync(StudentUser studentUser);
     }
 }

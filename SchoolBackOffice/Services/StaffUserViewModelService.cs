@@ -1,9 +1,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using SchoolBackOffice.Application.Common.Interfaces;
-using SchoolBackOffice.Application.Common.Models;
+using SchoolBackOffice.Interfaces;
+using SchoolBackOffice.Models;
+using SchoolBackOffice.ViewModels;
 
-namespace SchoolBackOffice.Services.StaffUsers
+namespace SchoolBackOffice.Services
 {
     public class StaffUserViewModelService : IStaffUserViewModelService
     {
@@ -16,10 +18,10 @@ namespace SchoolBackOffice.Services.StaffUsers
             _staffUserService = staffUserService;
         }
         
-        public async Task<(EditStaffViewModelDto EditStaffDto, string Error)> GetEditStaffViewModel(int staffUserId)
+        public async Task<(EditStaffViewModel EditStaffDto, string Error)> GetEditStaffViewModel(int staffUserId)
         {
             var staffUser = await _staffUserService.GetStaffUserAsync(staffUserId);
-            var vm = new EditStaffViewModelDto();
+            var vm = new EditStaffViewModel();
             
             if (staffUser == null)
                 return (vm, "User Not Found");
@@ -31,7 +33,7 @@ namespace SchoolBackOffice.Services.StaffUsers
             vm.Email = staffUser.Email;
             vm.FirstName = staffUser.FirstName;
             vm.LastName = staffUser.LastName;
-            vm.Roles = roleList.Select(x => new RoleViewModelDto()
+            vm.Roles = roleList.Select(x => new RoleViewModel()
             {
                 Name = x,
                 IsSelected = userRoles.Contains(x)

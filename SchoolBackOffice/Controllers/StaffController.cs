@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using SchoolBackOffice.Application.Common.Interfaces;
 using SchoolBackOffice.Domain.Entities;
+using SchoolBackOffice.Interfaces;
 using SchoolBackOffice.Models;
+using SchoolBackOffice.ViewModels;
 
 namespace SchoolBackOffice.Controllers
 {
@@ -30,6 +32,62 @@ namespace SchoolBackOffice.Controllers
             _staffUserViewModelService = staffUserViewModelService;
         }
         
+        [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Create(string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+
+            var res = await _identityService.GetRoleNames();
+            var vm = new CreateStaffViewModel
+            {
+                Roles = res.Select(x => new RoleViewModel {Name = x}).ToList()
+            };
+            
+            return View(vm);
+        }
+        
+        [HttpPost]
+        [Authorize(Roles = "Administrator")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateStaffViewModel model, string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            if (ModelState.IsValid)
+            {
+                var roles = model.Roles
+                    .Where(x => x.IsSelected)
+                    .Select(x => x.Name)
+                    .ToArray();
+
+                var newStaffUser = await _staffUserService.CreateStaffUserAsync(
+                    model.Email, model.Password, model.FirstName, model.LastName, roles);
+
+                if (newStaffUser.Error.Any())
+                {
+                    _logger.LogWarning($"Error Creating User '{model.LastName}, {model.FirstName}'");
+                    foreach (var error in newStaffUser.Error)
+                        ModelState.AddModelError("", error);
+                    model.Roles = roles.Select(x => new RoleViewModel()
+                    {
+                        Name = x
+                    }).ToList();
+                    return View(model);
+                }
+                
+                var staffUser = await _staffUserService.GetStaffUserAsync(newStaffUser.StaffUserId);
+                var token = await _identityService.GetEmailConfirmationTokenAsync(staffUser.AspUserId);
+                token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+                await SendEmail(model, returnUrl, staffUser, token);
+                _logger.LogInformation($"New Staff User '{model.LastName}, {model.FirstName}' created");
+
+                return RedirectToAction("StaffRoster", "Dashboard");
+            }
+
+            return View(model);
+        }
+
+        
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(int id)
         {
@@ -43,7 +101,7 @@ namespace SchoolBackOffice.Controllers
 
             var vm = new EditStaffViewModel
             {
-                StaffId = dto.StaffUserId,
+                StaffUserId = dto.StaffUserId,
                 Email = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
@@ -63,7 +121,6 @@ namespace SchoolBackOffice.Controllers
         public async Task<IActionResult> Edit(EditStaffViewModel model, int staffUserId)
         {
             ViewData["StaffUserId"] = staffUserId;
-            
             var staffUser = await _staffUserService.GetStaffUserAsync(staffUserId);
 
             if (staffUser == null)
@@ -111,56 +168,18 @@ namespace SchoolBackOffice.Controllers
         
         [HttpGet]
         [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> Create(string returnUrl = null)
+        public async Task<IActionResult> Delete(int id)
         {
-            ViewData["ReturnUrl"] = returnUrl;
-
-            var res = await _identityService.GetRoleNames();
-            var vm = new CreateStaffViewModel
-            {
-                Roles = res.Select(x => new RoleViewModel {Name = x}).ToList()
-            };
+            ViewData["StaffUserId"] = id;
+            var u = await _staffUserService.GetStaffUserAsync(id);
             
-            return View(vm);
+            if (u == null)
+                return Error();
+
+            var res = await _identityService.DeleteUserAsync(u.AspUserId);
+            return res.Succeeded ? RedirectToAction("StaffRoster", "Dashboard") : Error();
         }
         
-        [HttpPost]
-        [Authorize(Roles = "Administrator")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateStaffViewModel model, string returnUrl = null)
-        {
-            ViewData["ReturnUrl"] = returnUrl;
-            if (ModelState.IsValid)
-            {
-                var roles = model.Roles
-                    .Where(x => x.IsSelected)
-                    .Select(x => x.Name)
-                    .ToArray();
-
-                var newStaffUser = await _staffUserService.CreateStaffUserAsync(
-                    model.Email, model.Password, model.FirstName, model.LastName, roles);
-
-                var staffUser = await _staffUserService.GetStaffUserAsync(newStaffUser.StaffUserId);
-
-                var token = await _staffUserService.GetEmailConfirmationTokenAsync(staffUser);
-                
-                token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-
-                await SendEmail(model, returnUrl, staffUser, token);
-
-                _logger.LogInformation($"New Staff User '{model.LastName}, {model.FirstName}' created");
-
-                if (!newStaffUser.Error.Any()) 
-                    return RedirectToAction("StaffRoster", "Dashboard");
-                
-                _logger.LogWarning($"Error Creating User '{model.LastName}, {model.FirstName}'");
-                foreach (var error in newStaffUser.Error)
-                    ModelState.AddModelError("", error);
-            }
-
-            return View(model);
-        }
-
         private async Task SendEmail(CreateStaffViewModel model, string returnUrl, StaffUser staffUser, string token)
         {
             var emailConfirmationUrl = Url.Page(
@@ -177,20 +196,6 @@ namespace SchoolBackOffice.Controllers
                 $"Please change your password at your earliest convenience.";
 
             await _emailSender.SendEmailAsync(model.Email, "Account Created", message);
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            ViewData["StaffUserId"] = id;
-            var u = await _staffUserService.GetStaffUserAsync(id);
-            
-            if (u == null)
-                return Error();
-
-            var res = await _identityService.DeleteUserAsync(u.AspUserId);
-            return res.Succeeded ? RedirectToAction("StaffRoster", "Dashboard") : Error();
         }
         
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

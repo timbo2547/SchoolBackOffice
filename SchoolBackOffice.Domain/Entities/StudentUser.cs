@@ -10,6 +10,7 @@ namespace SchoolBackOffice.Domain.Entities
         public string LastName { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
+        public int? GradeLevelId { get; set; } = null;
         public GradeLevel Grade { get; set; }
         public string DisplayName => $"{LastName}, {FirstName}";
 

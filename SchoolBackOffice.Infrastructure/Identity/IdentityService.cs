@@ -143,5 +143,14 @@ namespace SchoolBackOffice.Infrastructure.Identity
             var result = await _userManager.DeleteAsync(user);
             return result.ToApplicationResult();
         }
+        
+        public async Task<string> GetEmailConfirmationTokenAsync(string aspUserId)
+        {
+            var applicationUser = await _userManager.Users
+                .FirstOrDefaultAsync(x => x.Id == aspUserId);
+            
+            return await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
+        }
+        
     }
 }

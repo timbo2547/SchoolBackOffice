@@ -15,13 +15,11 @@ namespace SchoolBackOffice.Infrastructure.Services
     {
         private readonly IIdentityService _identityService;
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
-        
-        public StudentUserService(IIdentityService identityService, ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+
+        public StudentUserService(IIdentityService identityService, ApplicationDbContext context)
         {
             _identityService = identityService;
             _context = context;
-            _userManager = userManager;
         }
         
         public async Task<StudentUser> GetUserAsync(int studentUserId)
@@ -33,6 +31,7 @@ namespace SchoolBackOffice.Infrastructure.Services
         public async Task<IEnumerable<StudentUser>> GetUsersAsync()
         {
             return await _context.StudentUsers
+                .Include(x => x.Grade)
                 .ToListAsync();
         }
 
@@ -47,7 +46,7 @@ namespace SchoolBackOffice.Infrastructure.Services
                     FirstName = firstName,
                     LastName = lastName,
                     Email = email,
-                    Grade = new GradeLevel()
+                    GradeLevelId = gradeLevelId,
                 };
                 
                 return await CreateStudentUserAsync(studentUser);
@@ -61,6 +60,12 @@ namespace SchoolBackOffice.Infrastructure.Services
             _context.StudentUsers.Add(studentUser);
             var r = await _context.SaveChangesAsync();
             return (Array.Empty<string>(), studentUser.StudentUserId);
+        }
+
+        public async Task<int> UpdateStudentUserAsync(StudentUser studentUser)
+        {
+            _context.StudentUsers.Update(studentUser);
+            return await _context.SaveChangesAsync();
         }
     }
 }

@@ -18,15 +18,11 @@ namespace SchoolBackOffice.Infrastructure.Services
     {
         private readonly IIdentityService _identityService;
         private readonly ApplicationDbContext _context;
-        private readonly IEmailSender _emailSender;
-        private readonly UserManager<ApplicationUser> _userManager;
-        
-        public StaffUserService(IIdentityService identityService, ApplicationDbContext context, IEmailSender emailSender, UserManager<ApplicationUser> userManager)
+
+        public StaffUserService(IIdentityService identityService, ApplicationDbContext context)
         {
             _identityService = identityService;
             _context = context;
-            _emailSender = emailSender;
-            _userManager = userManager;
         }
 
         public async Task<StaffUser> GetStaffUserAsync(int staffUserId)
@@ -62,11 +58,6 @@ namespace SchoolBackOffice.Infrastructure.Services
 
             return (res.Result.Errors, 0);
         }
-        
-        public async Task<string> GetEmailConfirmationTokenAsync(ApplicationUser user) 
-        {
-            return await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        }
 
         public async Task<(string[] Error, int StaffUserId)> CreateStaffUserAsync(StaffUser staffUser)
         {
@@ -79,14 +70,6 @@ namespace SchoolBackOffice.Infrastructure.Services
         {
             _context.StaffUsers.Update(staffUser);
             return await _context.SaveChangesAsync();
-        }
-
-        public async Task<string> GetEmailConfirmationTokenAsync(StaffUser user)
-        {
-            var applicationUser = await _userManager.Users
-                .FirstOrDefaultAsync(x => x.Id == user.AspUserId);
-            
-            return await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
         }
     }
 }
