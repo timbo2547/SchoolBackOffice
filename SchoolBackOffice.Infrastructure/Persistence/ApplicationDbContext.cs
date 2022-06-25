@@ -41,5 +41,6 @@ namespace SchoolBackOffice.Infrastructure.Persistence
         public DbSet<GradeLevel> GradeLevels => Set<GradeLevel>();
         public DbSet<StaffUser> StaffUsers => Set<StaffUser>();
         public DbSet<StudentUser> StudentUsers => Set<StudentUser>();
+        public DbSet<EnrollmentStatus> EnrollmentStatus => Set<EnrollmentStatus>();
     }
 }

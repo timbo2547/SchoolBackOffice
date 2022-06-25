@@ -32,6 +32,7 @@ namespace SchoolBackOffice.Infrastructure.Services
         {
             return await _context.StudentUsers
                 .Include(x => x.Grade)
+                .Include(x => x.EnrollmentStatus)
                 .ToListAsync();
         }
 
@@ -47,6 +48,7 @@ namespace SchoolBackOffice.Infrastructure.Services
                     LastName = lastName,
                     Email = email,
                     GradeLevelId = gradeLevelId,
+                    EnrollmentStatusId = 1,
                 };
                 
                 return await CreateStudentUserAsync(studentUser);

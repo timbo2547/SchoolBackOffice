@@ -84,6 +84,18 @@ namespace SchoolBackOffice.Infrastructure.Persistence
             };
         }
 
+        private static IEnumerable<EnrollmentStatus> GetDefaultStatus()
+        {
+            return new List<EnrollmentStatus>()
+            {
+                new ("Prospect"),
+                new ("Active"),
+                new ("Withdrawn"),
+                new ("Expelled"),
+                new ("Alumni"),
+            };
+        }
+
         private async Task TrySeedAsync()
         {
             // Default roles
@@ -107,6 +119,15 @@ namespace SchoolBackOffice.Infrastructure.Persistence
                 await _context.GradeLevels
                     .AddRangeAsync(GetDefaultGrades());
 
+                await _context.SaveChangesAsync();
+            }
+            
+            // Default Enrollment Status
+            if (!await _context.EnrollmentStatus.AnyAsync())
+            {
+                await _context.EnrollmentStatus
+                    .AddRangeAsync(GetDefaultStatus());
+                
                 await _context.SaveChangesAsync();
             }
             

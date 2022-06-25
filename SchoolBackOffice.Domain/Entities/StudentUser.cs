@@ -12,6 +12,8 @@ namespace SchoolBackOffice.Domain.Entities
         public string PhoneNumber { get; set; } = string.Empty;
         public int? GradeLevelId { get; set; } = null;
         public GradeLevel Grade { get; set; }
+        public int EnrollmentStatusId { get; set; }
+        public EnrollmentStatus EnrollmentStatus { get; set; }
         public string DisplayName => $"{LastName}, {FirstName}";
 
     }
